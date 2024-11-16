@@ -1,6 +1,3 @@
-//@ts-ignore
-import { optimize } from 'svgo/dist/svgo.browser.js';
-
 export default class TypstRenderElement extends HTMLElement {
     static compile: (path: string, source: string, size: number, display: boolean, fontSize: number) => Promise<ImageData | string>;
     static nextId = 0;
@@ -27,10 +24,6 @@ export default class TypstRenderElement extends HTMLElement {
             console.warn("Typst Renderer: Canvas element has been called before connection");
             return;
         }
-
-        // if (this.display && this.math) {
-        // this.style.height = TypstRenderElement.prevHeight;
-        // }
 
         if (this.format == "image" && this.canvas == undefined) {
             this.canvas = this.appendChild(createEl("canvas", { attr: { height: TypstRenderElement.prevHeight }, cls: "typst-doc" }))
@@ -67,8 +60,8 @@ export default class TypstRenderElement extends HTMLElement {
         this.abortController = new AbortController()
         try {
             await navigator.locks.request(this.id, { signal: this.abortController.signal }, async () => {
-                let fontSize = parseFloat(document.body.getCssPropertyValue("--font-text-size"))
-                this.size = this.display ? this.clientWidth : parseFloat(document.body.getCssPropertyValue("--line-height-normal")) * fontSize
+                let fontSize = parseFloat(getComputedStyle(this).fontSize)
+                this.size = this.display ? this.clientWidth : parseFloat(getComputedStyle(this).lineHeight)
 
                 // resizeObserver can trigger before the element gets disconnected which can cause the size to be 0
                 // which causes a NaN. size can also sometimes be -ve so wait for resize to draw it again
@@ -81,18 +74,12 @@ export default class TypstRenderElement extends HTMLElement {
                     if (result instanceof ImageData && this.format == "image") {
                         this.drawToCanvas(result)
                     } else if (typeof result == "string" && this.format == "svg") {
-                        this.innerHTML = optimize(result, {
-                            plugins: [
-                                {
-                                    name: "prefixIds",
-                                    params: {
-                                        prefix: this.num,
-                                        prefixClassNames: false,
-                                    }
-                                }
-                            ]
-                        }).data;
-                        (this.firstElementChild as SVGElement).setAttribute(this.display ? "width" : "height", this.size.toString())
+                        this.innerHTML = result;
+                        let child = (this.firstElementChild as SVGElement);
+                        child.setAttribute("width", child.getAttribute("width")!.replace("pt", ""))
+                        child.setAttribute("height", child.getAttribute("height")!.replace("pt", ""))
+                        child.setAttribute("width", `${this.firstElementChild!.clientWidth /fontSize}em`);
+                        child.setAttribute("height", `${this.firstElementChild!.clientHeight /fontSize}em`);
                     }
                 } catch (error) {
                     // For some reason it is uncaught so remove "Uncaught "

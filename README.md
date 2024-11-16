@@ -5,11 +5,14 @@ Renders `typst` code blocks, and optionally math blocks, into images using [Typs
 ## Small Things to NOTE
 - Typst does not currently support exporting to HTML only PDFs, PNGs and SVGs. So due to image scaling, the rendered views may look a bit terrible. If you know how to fix this PLEASE HELP.
 - File paths should be relative to the vault folder.
+- To help with loading times the web assembly file must be downloaded separately. This will automatically happen the first time the plugin is enabled and after an update!
 
 ## Versions
 
 | Plugin | Typst |
 |-|-|
+| 0.10 | 0.11.0 |
+| 0.9 | 0.10.0 |
 | 0.8 | 0.9.0 |
 | 0.7 | 0.8.0 |
 | 0.6 | [522708b](https://github.com/typst/typst/commit/522708b9df0b9b2f8265938aa1f0aeda8e6e6c1f) (Some commits after 0.7.0 to include SVG export) |
@@ -32,9 +35,10 @@ From what I've experimented with, normal math blocks are okay with Typst but Typ
 For styling and using imports with math blocks see the next section.
 
 ## Preambles
-Need to style your `typst` code the same way everytime and don't to write it out each time? Or using math blocks and need a way to import things? Use PREAMBLES! 
 
-Preambles are prepended to your `typst` code before compiling. There are three different types in settings:
+Need to style your `typst` code the same way everytime and don't to write it out each time? Or using math blocks and need a way to import things? Use PREAMBLES!
+
+Preambles are prepended to your `typst` code before compiling. There are three different types on the "Typst Renderer" plugin settings page:
 - `shared`: Prepended to all `typst` code.
 - `math`: Prepended to `typst` code only in math blocks.
 - `code`: Prepended to `typst` code only in code blocks.
@@ -122,5 +126,7 @@ Install it by copying `main.js`, `styles.css`, `obsidian_typst_bg.wasm` and `man
 - [ ] Use HTML output
 - [x] Override default equation rendering
 - [ ] Custom editor for `.typ` files
-- [ ] Mobile file reading
-- [ ] Automate package downloading
+- [x] Mobile file reading
+- [x] Automate package downloading
+- [ ] Use `sys.stdin` for preambles instead of modifying the source cod
+- [ ] Overhall plugin structure (mostly communication with the webworker)
